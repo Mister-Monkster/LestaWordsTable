@@ -1,3 +1,4 @@
+import os
 import string
 import uuid
 from math import log
@@ -26,20 +27,47 @@ class FileService:
             word_dict[word][0] += 1
         for key in word_dict.keys():
             word_dict[key][1] = round(log(words_counter / word_dict[key][0]), 3)
-        return word_dict
+        result = []
+        for key, value in word_dict.items():
+            result.append([key, *value])
+        result.sort(key=lambda x: x[-1], reverse=True)
+        return result
+
+    @staticmethod
+    async def save_file(file: UploadFile, filename: str):
+        dir = f'../files/{filename}.txt'
+        dir_name = os.path.dirname(dir)
+        if not os.path.exists(dir_name):
+            os.mkdir(dir_name)
+        async with aiofiles.open(dir, "wb") as f:
+            text = await file.read()
+            await f.write(text)
+            return text.decode('utf-8')
 
 
-    async def download(self, file: UploadFile):
+    async def download(self, file: UploadFile, filename: str):
         """Проверяем тип файла и возвращаем первые 50 слов"""
         if file.headers['content-type'] != 'text/plain':
             return False
-        content = await file.read()
-        text = content.decode("utf-8")
-        if text == '':
-            return False
+        text = await self.save_file(file, filename)
         res = await self.content_analysis(text)
-        result = []
-        for key, value in res.items():
-            result.append([key, *value])
-        result.sort(key=lambda x: x[-1], reverse=True)
-        return result[0: 50]
+        return res
+
+
+    async def read_file(self, filename: str, page_num: int):
+        dir = f'../files/{filename}.txt'
+        if os.path.exists(dir):
+            async with aiofiles.open(dir, "rb") as f:
+                text = await f.read()
+                text = text.decode('utf-8')
+                content = await self.content_analysis(text)
+                total_pages = (len(content) + 49) // 50
+                if total_pages == 1:
+                    return content
+                start = (page_num - 1) * 50
+                end = start + 50
+                content = content[start:end]
+                return {'content': content,'total_pages': total_pages}
+
+        else:
+            raise FileNotFoundError('File not found')
