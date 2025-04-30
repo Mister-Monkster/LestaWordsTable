@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Таблица по файлу</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body>
+<table>
+  <tr>
+    <th>Слово</th>
+    <th>tf</th>
+    <th>idf</th>
+  </tr>
+    {% for item in data %}
+    <tr>
+      <td>{{ item[0] }}</td>
+      <td>{{ item[1] }}</td>
+      <td>{{ item[2] }}</td>
+    </tr>
+  {% endfor %}
+
+</table>
+</body>
+</html>

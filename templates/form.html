@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Форма</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body>
+    <div class="form">
+    <form action="/file/table/1/" method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Отправить</button>
+    </form>
+    </div>
+</body>
+</html>
